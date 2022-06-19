@@ -35,5 +35,11 @@
             <artifactId>lambda</artifactId>
             <version>${cdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awscdk</groupId>
+            <artifactId>apigateway</artifactId>
+            <version>1.159.0</version>
+        </dependency>
+
     </dependencies>
 </project>
