@@ -27,5 +27,11 @@
             <artifactId>github-api</artifactId>
             <version>1.132</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awscdk</groupId>
+            <artifactId>stepfunctions</artifactId>
+            <version>1.159.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

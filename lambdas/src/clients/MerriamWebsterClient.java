@@ -47,7 +47,6 @@ public class MerriamWebsterClient {
         System.out.println(String.format("Response received: [%s]", response.getEntity().getContent().toString()));
         List<Definition> definitions = objectMapper.readValue(response.getEntity().getContent(),
                 new TypeReference<List<Definition>>() {});
-        definitions.stream().filter(definition -> definition.getMeta().equals(word));
         return definitions;
     }
 }

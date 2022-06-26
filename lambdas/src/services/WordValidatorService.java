@@ -7,6 +7,7 @@ import models.DictionaryDefinition;
 import models.ValidatedDefinition;
 import models.ValidationResult;
 import modules.LambdaModule;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,19 +37,32 @@ public class WordValidatorService {
     }
 
     public ValidationResult validateWord(final String word) throws IOException {
-        final DictionaryDefinition definition = merriamWebsterClient.getDefinition(word);
-        if(!definition.hasDefinitions()) {
+        final DictionaryDefinition fetchedDefinitions = merriamWebsterClient.getDefinition(word);
+        final String wildCardWordSearchString = String.format("%s:*", word).toLowerCase();
+
+        final List<Definition> filteredDefinitions = fetchedDefinitions.getDefinitions()
+                .stream()
+                .filter(def -> def.getMeta().getId().equalsIgnoreCase(word.trim()) ||
+                        FilenameUtils.wildcardMatchOnSystem(def.getMeta().getId().toLowerCase(), wildCardWordSearchString)
+        ).collect(Collectors.toList());
+
+        if(filteredDefinitions.isEmpty()) {
             return ValidationResult.builder()
                     .isValid(false)
                     .reason(String.format("No definition found for [%s]", word))
                     .build();
         }
 
+        final DictionaryDefinition definition = DictionaryDefinition.builder()
+                .definitions(filteredDefinitions)
+                .word(word)
+                .build();
+
         final Set<String> invalidWords = wordClient.readFile();
         final Set<String> invalidCategories = categoryClient.readFile();
 
         if(invalidWords.contains(word)) {
-            final List<ValidatedDefinition> invalidDefinitions = definition.getDefinitions().stream().map(
+            final List<ValidatedDefinition> invalidatedDefinitions = definition.getDefinitions().stream().map(
                     def -> ValidatedDefinition.builder()
                             .isValid(false)
                             .reason("Exception word")
@@ -56,7 +70,7 @@ public class WordValidatorService {
                             .build()
             ).collect(Collectors.toList());
             return ValidationResult.builder()
-                    .invalidDefinition(invalidDefinitions)
+                    .invalidDefinition(invalidatedDefinitions)
                     .isValid(false)
                     .reason(String.format("Word [%s] is invalid because of house rules.", word))
                     .build();

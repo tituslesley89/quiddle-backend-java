@@ -1,13 +1,8 @@
 package cdk;
 
-import software.amazon.awscdk.core.*;
-
-import software.amazon.awscdk.services.lambda.*;
-import software.amazon.awscdk.services.lambda.Runtime;
-import software.amazon.awscdk.services.logs.RetentionDays;
-import software.amazon.awscdk.services.s3.assets.AssetOptions;
-
-import java.util.Arrays;
+import software.amazon.awscdk.core.App;
+import software.amazon.awscdk.core.Construct;
+import software.amazon.awscdk.core.StackProps;
 
 public class Stack extends software.amazon.awscdk.core.Stack {
 

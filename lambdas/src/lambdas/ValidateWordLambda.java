@@ -10,6 +10,7 @@ import components.DaggerComponentBuilder;
 import models.ValidationResult;
 import org.apache.commons.lang3.StringUtils;
 import services.WordValidatorService;
+import utils.HeaderUtils;
 
 import java.io.IOException;
 
@@ -30,17 +31,20 @@ public class ValidateWordLambda implements RequestHandler<APIGatewayProxyRequest
         if (StringUtils.isEmpty(word)) {
            System.out.println("Word not defined");
            return new APIGatewayProxyResponseEvent()
+                   .withHeaders(HeaderUtils.getCorsHeader())
                    .withStatusCode(400);
         }
         try {
             ValidationResult validationResult = wordValidatorService.validateWord(word);
             final APIGatewayProxyResponseEvent apiGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
                     .withBody(objectMapper.writeValueAsString(validationResult))
+                    .withHeaders(HeaderUtils.getCorsHeader())
                     .withStatusCode(200);
             return apiGatewayProxyResponseEvent;
         } catch (IOException e) {
             e.printStackTrace();
             return new APIGatewayProxyResponseEvent()
+                    .withHeaders(HeaderUtils.getCorsHeader())
                     .withStatusCode(500);
         }
     }

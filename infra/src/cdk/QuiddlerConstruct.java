@@ -1,21 +1,17 @@
 package cdk;
 
+import com.amazonaws.services.apigateway.AmazonApiGateway;
 import org.jetbrains.annotations.NotNull;
 import software.amazon.awscdk.core.Construct;
 import software.amazon.awscdk.core.Duration;
-import software.amazon.awscdk.services.apigateway.LambdaIntegration;
-import software.amazon.awscdk.services.apigateway.Resource;
-import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.apigateway.*;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.logs.RetentionDays;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.BucketProps;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class QuiddlerConstruct extends Construct {
     private final Bucket quiddlerSource;
@@ -78,7 +74,26 @@ public class QuiddlerConstruct extends Construct {
         quiddlerSource.grantReadWrite(toggleWordLambdaFunction);
         quiddlerSource.grantReadWrite(toggleCategoryLambdaFunction);
 
-        restApi = new RestApi(scope, "RestApi");
+        final List<String> allowHeaders = new ArrayList<>();
+        allowHeaders.add("Content-Type");
+
+        final List<String> allowMethods = new ArrayList<>();
+        allowMethods.add("OPTIONS");
+        allowMethods.add("GET");
+        allowMethods.add("POST");
+
+        final List<String> allowOrigins = new ArrayList<>();
+        allowOrigins.add("*");
+
+        RestApiProps restApiProps = RestApiProps.builder()
+                .defaultCorsPreflightOptions(CorsOptions.builder()
+                        .allowHeaders(allowHeaders)
+                        .allowMethods(allowMethods)
+                        .allowOrigins(allowOrigins)
+                        .build())
+                .build();
+
+        restApi = new RestApi(scope, "RestApi", restApiProps);
         final Resource validate = restApi.getRoot().addResource("validate");
         final Resource validateWord = validate.addResource("{word}");
         validateWord.addMethod("GET", new LambdaIntegration(validateWordLambdaFunction));

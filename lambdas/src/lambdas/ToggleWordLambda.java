@@ -10,6 +10,7 @@ import components.DaggerComponentBuilder;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import services.WordValidatorService;
+import utils.HeaderUtils;
 
 public class ToggleWordLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -29,16 +30,19 @@ public class ToggleWordLambda implements RequestHandler<APIGatewayProxyRequestEv
         final String word = input.getPathParameters().get("word");
         if(StringUtils.isEmpty(accessKey) || StringUtils.isEmpty(word)) {
             return new APIGatewayProxyResponseEvent()
+                    .withHeaders(HeaderUtils.getCorsHeader())
                     .withStatusCode(400);
         }
 
         if(!wordValidatorService.isValidAccessKey(accessKey)) {
             return new APIGatewayProxyResponseEvent()
+                    .withHeaders(HeaderUtils.getCorsHeader())
                     .withStatusCode(403);
         }
 
         wordValidatorService.toggleWord(word);
         return new APIGatewayProxyResponseEvent()
+                .withHeaders(HeaderUtils.getCorsHeader())
                 .withStatusCode(200);
     }
 }
